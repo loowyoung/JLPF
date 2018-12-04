@@ -1,0 +1,26 @@
+#layui-logo {
+	left: 40px;
+	width: 260px;
+	color: #f2f9f8;
+	font-weight: bold;
+}
+
+.left {
+	bottom: 0 !important;
+}
+
+.layui-table {
+	width: -webkit-fill-available !important;
+}
+
+#username {
+	font-size: 14px;
+	color: #f2f9f8;
+	font-weight: bold;
+	font-style: normal;
+}
+
+.layui-icon-close-fill {
+	font-size: 14px !important;
+	color: #FF3333 !important;
+}

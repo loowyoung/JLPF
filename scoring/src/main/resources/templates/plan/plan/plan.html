@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head th:include="include :: header"></head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content ">
+		<div class="col-sm-12">
+			<div class="ibox">
+				<div class="ibox-body">
+					<div class="fixed-table-toolbar">
+						<!--<div class="columns pull-left">
+							<button shiro:hasPermission="plan:plan:add" type="button" class="btn  btn-primary" onclick="add()">
+								<i class="fa fa-plus" aria-hidden="true"></i>添加
+							</button>
+							<button shiro:hasPermission="plan:plan:batchRemove" type="button" class="btn  btn-danger"
+								onclick="batchRemove()">
+								<i class="fa fa-trash" aria-hidden="true"></i>删除
+							</button>
+						</div>
+						<div class="columns left">
+							<button class="btn btn-success" onclick="reLoad()">查询</button>
+						</div>-->
+						<div class="columns pull-left col-md-2 nopadding">
+							<select id="jobname" data-placeholder="选择类别" class="form-control chosen-select"
+									tabindex="2" style="width: 100%">
+								<option value="">选择岗位</option>
+							</select>
+						</div>
+
+						<div class="columns pull-right nopadding">
+							<button class="btn btn-success" onclick="setTime()">设置面试时间</button>
+						</div>
+						<div class="columns pull-right col-md-2 nopadding">
+							<input type="text" class="layui-input form-control" id="endtime" placeholder="结束时间">
+						</div>
+						<div class="columns pull-right col-md-2 nopadding">
+							<input type="text" class="layui-input form-control" id="starttime" placeholder="开始时间">
+						</div>
+
+					<table id="exampleTable" data-mobile-responsive="true" style="word-break:break-all;">
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--shiro控制bootstraptable行内按钮看见性 来自bootdo的创新方案 -->
+		<div>
+			<script type="text/javascript">
+				var s_edit_h = 'hidden';
+				var s_remove_h = 'hidden';
+				var s_resetPwd_h = 'hidden';
+			</script>
+		</div>
+		<div shiro:hasPermission="plan:plan:edit">
+			<script type="text/javascript">
+				s_edit_h = '';
+			</script>
+		</div>
+		<div shiro:hasPermission="plan:plan:remove">
+			<script type="text/javascript">
+				var s_remove_h = '';
+			</script>
+		</div>
+		<div shiro:hasPermission="plan:plan:resetPwd">
+			<script type="text/javascript">
+				var s_resetPwd_h = '';
+			</script>
+		</div>
+	</div>
+	<div th:include="include :: footer"></div>
+	<script type="text/javascript" src="/js/appjs/plan/plan/plan.js"></script>
+</body>
+</html>

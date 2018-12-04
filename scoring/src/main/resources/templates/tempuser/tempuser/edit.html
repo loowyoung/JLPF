@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head th:include="include :: header"></head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content ">
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="ibox float-e-margins">
+					<div class="ibox-content">
+						<form class="form-horizontal m-t" id="signupForm">
+						<input id="id" name="id" th:value="${tempuser.id}"  type="hidden">
+							<div class="form-group">	
+								<label class="col-sm-3 control-label">账号：</label>
+								<div class="col-sm-8">
+									<input id="username" name="username" th:value="${tempuser.username}" class="form-control" type="text">
+								</div>
+							</div>
+														<div class="form-group">	
+								<label class="col-sm-3 control-label">密码：</label>
+								<div class="col-sm-8">
+									<input id="password" name="password" th:value="${tempuser.password}" class="form-control" type="text">
+								</div>
+							</div>
+														<div class="form-group">	
+								<label class="col-sm-3 control-label">状态：</label>
+								<div class="col-sm-8">
+									<!--<input id="status" name="status" th:value="${tempuser.status}" class="form-control" type="text">-->
+									<label class="radio-inline">
+										<input th:field="*{tempuser.status}" type="radio" name="status" value="1" />
+										启用
+									</label>
+									<label class="radio-inline">
+									<input th:field="*{tempuser.status}" type="radio" name="status" value="0" />
+										停用
+									</label>
+								</div>
+							</div>
+														<!--<div class="form-group">
+								<label class="col-sm-3 control-label">创建者：</label>
+								<div class="col-sm-8">
+									<input id="createBy" name="createBy" th:value="${tempuser.createBy}" class="form-control" type="text">
+								</div>
+							</div>
+														<div class="form-group">	
+								<label class="col-sm-3 control-label">创建时间：</label>
+								<div class="col-sm-8">
+									<input id="createDate" name="createDate" th:value="${tempuser.createDate}" class="form-control" type="text">
+								</div>
+							</div>
+														<div class="form-group">	
+								<label class="col-sm-3 control-label">修改者：</label>
+								<div class="col-sm-8">
+									<input id="updateBy" name="updateBy" th:value="${tempuser.updateBy}" class="form-control" type="text">
+								</div>
+							</div>
+														<div class="form-group">	
+								<label class="col-sm-3 control-label">修改时间：</label>
+								<div class="col-sm-8">
+									<input id="updateDate" name="updateDate" th:value="${tempuser.updateDate}" class="form-control" type="text">
+								</div>
+							</div>-->
+							<div class="form-group">
+								<label class="col-sm-3 control-label">岗位</label>
+								<div class="col-sm-8">
+									<label th:each="job:${jobs}" class="checkbox-inline">
+										<input name="jobsid" type="checkbox" th:value="${job.id}"
+											   th:text="${job.jobname}" th:checked="${job.checked}">
+									</label>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label">描述：</label>
+								<div class="col-sm-8">
+									<input id="remarks" name="remarks" th:value="${tempuser.remarks}" class="form-control" type="text">
+								</div>
+							</div>
+																					<div class="form-group">
+								<div class="col-sm-8 col-sm-offset-3">
+									<button type="submit" class="btn btn-primary">提交</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+	</div>
+	</div>
+	<div th:include="include::footer"></div>
+	<script type="text/javascript" src="/js/appjs/tempuser/tempuser/edit.js">
+	</script>
+</body>
+</html>

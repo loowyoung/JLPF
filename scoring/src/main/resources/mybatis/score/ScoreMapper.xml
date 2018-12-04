@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.anxin.score.dao.ScoreDao">
+
+	<select id="get" resultType="com.anxin.score.domain.ScoreDO">
+		select `id`,`tempuser_id`,`applicant_id`,`score`,`scoretime`,`ranking`,`create_by`,`create_date`,`update_by`,`update_date`,`remarks` from ax_score where id = #{value}
+	</select>
+
+	<select id="list" resultType="com.anxin.score.domain.ScoreDO">
+		select `id`,`tempuser_id`,`applicant_id`,`score`,`scoretime`,`ranking`,`create_by`,`create_date`,`update_by`,`update_date`,`remarks` from ax_score
+        <where>  
+		  		  <if test="id != null and id != ''"> and id = #{id} </if>
+		  		  <if test="tempuserId != null and tempuserId != ''"> and tempuser_id = #{tempuserId} </if>
+		  		  <if test="applicantId != null and applicantId != ''"> and applicant_id = #{applicantId} </if>
+		  		  <if test="score != null and score != ''"> and score = #{score} </if>
+		  		  <if test="scoretime != null and scoretime != ''"> and scoretime = #{scoretime} </if>
+		  		  <if test="ranking != null and ranking != ''"> and ranking = #{ranking} </if>
+		  		  <if test="createBy != null and createBy != ''"> and create_by = #{createBy} </if>
+		  		  <if test="createDate != null and createDate != ''"> and create_date = #{createDate} </if>
+		  		  <if test="updateBy != null and updateBy != ''"> and update_by = #{updateBy} </if>
+		  		  <if test="updateDate != null and updateDate != ''"> and update_date = #{updateDate} </if>
+		  		  <if test="remarks != null and remarks != ''"> and remarks = #{remarks} </if>
+		  		</where>
+        <choose>
+            <when test="sort != null and sort.trim() != ''">
+                order by ${sort} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="count" resultType="int">
+		select count(*) from ax_score
+		 <where>  
+		  		  <if test="id != null and id != ''"> and id = #{id} </if>
+		  		  <if test="tempuserId != null and tempuserId != ''"> and tempuser_id = #{tempuserId} </if>
+		  		  <if test="applicantId != null and applicantId != ''"> and applicant_id = #{applicantId} </if>
+		  		  <if test="score != null and score != ''"> and score = #{score} </if>
+		  		  <if test="scoretime != null and scoretime != ''"> and scoretime = #{scoretime} </if>
+		  		  <if test="ranking != null and ranking != ''"> and ranking = #{ranking} </if>
+		  		  <if test="createBy != null and createBy != ''"> and create_by = #{createBy} </if>
+		  		  <if test="createDate != null and createDate != ''"> and create_date = #{createDate} </if>
+		  		  <if test="updateBy != null and updateBy != ''"> and update_by = #{updateBy} </if>
+		  		  <if test="updateDate != null and updateDate != ''"> and update_date = #{updateDate} </if>
+		  		  <if test="remarks != null and remarks != ''"> and remarks = #{remarks} </if>
+		  		</where>
+	</select>
+	<select id="getByUseridAndApplicantid" resultType="com.anxin.score.domain.ScoreDO">
+		select * from ax_score
+		WHERE
+		 tempuser_id = #{userid} and applicant_id = #{applicantid}
+	</select>
+	<select id="getAvScore" resultType="com.anxin.applicants.domain.model.AvScore">
+		SELECT
+			(m.sumscore / m.counttempuser) AS avfs
+		FROM
+			(
+				SELECT
+					sum(CAST(b.score AS DECIMAL(10,2))) AS sumscore,
+					COUNT(b.id) AS counttempuser
+				FROM
+					ax_applicants a
+				LEFT JOIN ax_score b ON a.id = b.applicant_id
+				WHERE
+					a.id = #{applicantId}
+					AND b.score is NOT NULL
+			) m
+	</select>
+
+	<insert id="save" parameterType="com.anxin.score.domain.ScoreDO">
+		insert into ax_score
+		(
+			`id`, 
+			`tempuser_id`, 
+			`applicant_id`, 
+			`score`, 
+			`scoretime`, 
+			`ranking`, 
+			`create_by`, 
+			`create_date`, 
+			`update_by`, 
+			`update_date`, 
+			`remarks`
+		)
+		values
+		(
+			#{id}, 
+			#{tempuserId}, 
+			#{applicantId}, 
+			#{score}, 
+			#{scoretime}, 
+			#{ranking}, 
+			#{createBy}, 
+			#{createDate}, 
+			#{updateBy}, 
+			#{updateDate}, 
+			#{remarks}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.anxin.score.domain.ScoreDO">
+		update ax_score 
+		<set>
+			<if test="tempuserId != null">`tempuser_id` = #{tempuserId}, </if>
+			<if test="applicantId != null">`applicant_id` = #{applicantId}, </if>
+			<if test="score != null">`score` = #{score}, </if>
+			<if test="scoretime != null">`scoretime` = #{scoretime}, </if>
+			<if test="ranking != null">`ranking` = #{ranking}, </if>
+			<if test="createBy != null">`create_by` = #{createBy}, </if>
+			<if test="createDate != null">`create_date` = #{createDate}, </if>
+			<if test="updateBy != null">`update_by` = #{updateBy}, </if>
+			<if test="updateDate != null">`update_date` = #{updateDate}, </if>
+			<if test="remarks != null">`remarks` = #{remarks}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="remove">
+		delete from ax_score where id = #{value}
+	</delete>
+	
+	<delete id="batchRemove">
+		delete from ax_score where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.anxin.plan.dao.PlanDao">
+
+	<select id="get" resultType="com.anxin.plan.domain.PlanDO">
+		select `id`,`starttime`,`endtime`,`create_by`,`create_date`,`update_by`,`update_date`,`remarks` from ax_plan where id = #{value}
+	</select>
+
+	<select id="list" resultType="com.anxin.plan.domain.PlanDO">
+-- 		SELECT
+-- 		a.username,a.id,a.sex,a.idnumber,a.phone,c.jobname,GROUP_CONCAT(e.username ORDER BY e.usernum ASC SEPARATOR ',') as tempuser,b.starttime,b.endtime,b.create_by,b.create_date,b.update_by,b.update_date,b.remarks
+-- 		FROM
+-- 		ax_applicants a
+-- 		LEFT JOIN ax_plan b ON a.interviewdate = b.id
+-- 		LEFT JOIN ax_post c ON a.job = c.jobname
+-- 		LEFT JOIN ax_jobtempuser d ON c.id=d.job_id
+-- 		LEFT JOIN ax_tempuser e ON d.tempuser_id=e.id
+		SELECT
+		a.username,
+		a.id,
+		a.sex,
+		a.idnumber,
+		a.phone,
+		c.jobname,
+		GROUP_CONCAT(
+		DISTINCT e.username ORDER BY e.usernum ASC SEPARATOR ','
+		) AS tempuser,
+		GROUP_CONCAT(
+		DISTINCT f.tempuser_username ORDER BY f.tempuser_usernum ASC SEPARATOR ','
+		) AS notscore,
+		b.starttime,
+		b.endtime,
+		b.create_by,
+		b.create_date,
+		b.update_by,
+		b.update_date,
+		b.remarks
+		FROM
+		ax_applicants a
+		LEFT JOIN ax_plan b ON a.interviewdate = b.id
+		LEFT JOIN ax_post c ON a.job = c.jobname
+		LEFT JOIN ax_jobtempuser d ON c.id = d.job_id
+		LEFT JOIN ax_tempuser e ON d.tempuser_id = e.id
+		LEFT JOIN (
+		SELECT
+		application_id,
+		tempuser_username,
+		tempuser_usernum
+		FROM
+		(
+		SELECT
+		ax_applicants.id AS application_id,
+		ax_applicants.username AS applicants_username,
+		ax_applicants.job,
+		ax_jobtempuser.tempuser_id,
+		ax_tempuser.username AS tempuser_username,
+		ax_tempuser.usernum AS tempuser_usernum,
+		ax_post.jobname
+		FROM
+		ax_applicants,
+		ax_jobtempuser,
+		ax_post,
+		ax_tempuser
+		WHERE
+		ax_applicants.job = ax_post.jobname
+		AND ax_jobtempuser.job_id = ax_post.id
+		AND ax_tempuser.id = ax_jobtempuser.tempuser_id
+		) AS t1
+		WHERE
+		NOT EXISTS (
+		SELECT
+		*
+		FROM
+		ax_score
+		WHERE
+		ax_score.applicant_id = t1.application_id
+		AND ax_score.tempuser_id = t1.tempuser_id
+		AND ax_score.score IS NOT NULL
+		)
+		) f ON a.id = f.application_id
+		<where>
+			<if test="jobname != null and jobname != ''"> a.job = #{jobname} </if>
+		</where>
+		GROUP BY
+		a.id
+        <choose>
+            <when test="sort != null and sort.trim() != ''">
+                order by ${sort} ${order}
+            </when>
+			<otherwise>
+                order by c.jobname desc ,convert(a.username using gbk) asc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="count" resultType="int">
+		select count(*) from
+		ax_applicants a
+		LEFT JOIN ax_plan b ON a.interviewdate = b.id
+		 <where>  
+		  	<if test="id != null and id != ''"> and b.id = #{id} </if>
+		  	<if test="starttime != null and starttime != ''"> and b.starttime = #{starttime} </if>
+		  	<if test="endtime != null and endtime != ''"> and b.endtime = #{endtime} </if>
+		  	<if test="createBy != null and createBy != ''"> and b.create_by = #{createBy} </if>
+		  	<if test="createDate != null and createDate != ''"> and b.create_date = #{createDate} </if>
+		  	<if test="updateBy != null and updateBy != ''"> and b.update_by = #{updateBy} </if>
+		  	<if test="updateDate != null and updateDate != ''"> and b.update_date = #{updateDate} </if>
+		  	<if test="remarks != null and remarks != ''"> and b.remarks = #{remarks} </if>
+			<if test="jobname != null and jobname != ''"> a.job = #{jobname} </if>
+		 </where>
+	</select>
+	 
+	<insert id="save" parameterType="com.anxin.plan.domain.PlanDO">
+		insert into ax_plan
+		(
+			`id`, 
+			`starttime`, 
+			`endtime`, 
+			`create_by`, 
+			`create_date`, 
+			`update_by`, 
+			`update_date`, 
+			`remarks`
+		)
+		values
+		(
+			#{id}, 
+			#{starttime}, 
+			#{endtime}, 
+			#{createBy}, 
+			#{createDate}, 
+			#{updateBy}, 
+			#{updateDate}, 
+			#{remarks}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.anxin.plan.domain.PlanDO">
+		update ax_plan 
+		<set>
+			<if test="starttime != null">`starttime` = #{starttime}, </if>
+			<if test="endtime != null">`endtime` = #{endtime}, </if>
+			<if test="createBy != null">`create_by` = #{createBy}, </if>
+			<if test="createDate != null">`create_date` = #{createDate}, </if>
+			<if test="updateBy != null">`update_by` = #{updateBy}, </if>
+			<if test="updateDate != null">`update_date` = #{updateDate}, </if>
+			<if test="remarks != null">`remarks` = #{remarks}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="remove">
+		delete from ax_plan where id = #{value}
+	</delete>
+	
+	<delete id="batchRemove">
+		delete from ax_plan where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="listJob" resultType="com.anxin.plan.domain.PlanDO">
+-- 		select job as jobname from ax_applicants GROUP BY job
+		select jobname from ax_post where `status`=1
+	</select>
+
+	<update id="batchSetTime">
+		UPDATE ax_applicants set interviewdate=#{planid} where id in
+		<foreach item="id" collection="appids" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+
+</mapper>

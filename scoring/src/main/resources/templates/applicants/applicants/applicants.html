@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head th:include="include :: header"></head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content ">
+		<div class="col-sm-12">
+			<div class="ibox">
+				<div class="ibox-body">
+					<div class="fixed-table-toolbar fixed-table-inquire">
+						<div class="fixed-table-inquire-left">
+							<!--<div class="columns pull-left col-md-1.5 nopadding">-->
+								<!--<input type="text" class="form-control" id="searchstarttime" placeholder="开始时间" style="width:160px;">-->
+							<!--</div>-->
+							<!--<div class="columns pull-left col-md-1.5 nopadding">-->
+								<!--<input type="text" class="form-control" id="searchendtime" placeholder="结束时间" style="width:160px;">-->
+							<!--</div>-->
+							<div class="columns pull-left col-md-4 nopadding">
+								<!--<input id="searchName" type="text" class="form-control" placeholder="岗位名称">-->
+								<select id="jobname" data-placeholder="选择岗位" class="form-control chosen-select"
+										tabindex="2" style="width: 100%">
+									<option value="">选择岗位</option>
+								</select>
+							</div>
+							<div class="columns pull-left col-md-3 nopadding">
+								<input id="searchName" type="text" class="form-control" placeholder="姓名">
+							</div>
+							<button class="btn btn-success pull-left" onclick="reLoad()">查询</button>
+						</div>
+
+						<!--<div class="columns pull-left">-->
+
+						<!--</div>-->
+						<div class="action-but">
+							<button shiro:hasPermission="applicants:applicants:add" type="button" class="btn  btn-primary" onclick="add()">
+								<i class="fa fa-plus" aria-hidden="true"></i>新增
+							</button>
+							<button shiro:hasPermission="applicants:applicants:batchRemove" type="button" class="btn  btn-danger"
+								onclick="batchRemove()">
+								<i class="fa fa-trash" aria-hidden="true"></i>删除
+							</button>
+
+							<button type="button" class="btn  btn-success" onclick="editApplicant()">
+								<i class="" aria-hidden="true"></i>编辑
+							</button>
+							<button type="button" class="btn  btn-success" id="importExcel">
+								<i class="" aria-hidden="true"></i>概要信息上传
+							</button>
+							<button type="button" class="btn  btn-success" id="importEnglish">
+								<i class="" aria-hidden="true"></i>英语成绩上传
+							</button>
+							<button type="button" class="btn  btn-success" onclick="exportList()">
+								<i class="" aria-hidden="true"></i>导出列表
+							</button>
+						</div>
+
+					</div>
+                    <div class="table-responsive" style="width: 100%;height: 100%">
+                        <table  id="exampleTable"  data-mobile-responsive="true" class="text-nowrap"></table>
+                    </div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--shiro控制bootstraptable行内按钮看见性 来自bootdo的创新方案 -->
+		<div>
+			<script type="text/javascript">
+				var s_edit_h = 'hidden';
+				var s_remove_h = 'hidden';
+				var s_resetPwd_h = 'hidden';
+			</script>
+		</div>
+		<div shiro:hasPermission="applicants:applicants:edit">
+			<script type="text/javascript">
+				s_edit_h = '';
+			</script>
+		</div>
+		<div shiro:hasPermission="applicants:applicants:remove">
+			<script type="text/javascript">
+				var s_remove_h = '';
+			</script>
+		</div>
+		<div shiro:hasPermission="applicants:applicants:resetPwd">
+			<script type="text/javascript">
+				var s_resetPwd_h = '';
+			</script>
+		</div>
+	</div>
+	<div th:include="include :: footer"></div>
+	<script type="text/javascript" src="/js/appjs/applicants/applicants/applicants.js">
+	</script>
+</body>
+</html>

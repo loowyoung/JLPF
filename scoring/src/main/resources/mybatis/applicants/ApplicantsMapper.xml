@@ -1,0 +1,658 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.anxin.applicants.dao.ApplicantsDao">
+
+    <select id="get" resultType="com.anxin.applicants.domain.ApplicantsDO">
+		select `id`,`username`,`sex`,`job`,`birthday`,`idnumber`,`phone`,`mail`,`politics`,`type`,`bachelorschool`,`masterschool`,`doctorschool`,`bachelormajor`,`mastermajor`,`doctormajor`,`graduationdate`,`hometown`,`languagelevel`,`computerlevel`,`resumenum`,`resumeurl`,`interviewresult`,`englishscore`,`status`,`interviewdate`,`jobone`,`jobtwo`,`jobthree`,`exemptionreason`,`create_by`,`create_date`,`update_by`,`update_date`,`remarks` from ax_applicants where id = #{value}
+	</select>
+    <select id="getExcellents" resultType="com.anxin.applicants.domain.ApplicantsDO">
+		SELECT
+			m.*, s.score,
+			s.ranking
+		FROM
+			(
+				SELECT
+					*
+				FROM
+					ax_applicants a
+				WHERE
+					a.type = '优才'
+				AND a.interviewdate IN (
+					SELECT
+						n.id
+					FROM
+						ax_plan n
+					WHERE
+						NOW() BETWEEN n.starttime
+					AND n.endtime
+				)
+				AND a.job in (
+					SELECT
+						p.jobname
+					FROM
+						ax_post p
+					WHERE
+						p.`status` = '1'
+					AND p.id IN (
+						SELECT
+							job_id
+						FROM
+							ax_jobtempuser
+						WHERE
+							tempuser_id = #{userid}
+					)
+				)
+			) m
+		LEFT JOIN (
+			SELECT
+				*
+			FROM
+				ax_score
+			WHERE
+				tempuser_id = #{userid}
+		) s ON s.applicant_id = m.id
+		ORDER BY
+			(s.ranking IS NULL or s.ranking=''),
+			s.ranking+1 ASC,
+			s.update_date DESC
+	</select>
+
+    <select id="list" resultType="com.anxin.applicants.domain.ApplicantsDO">
+        select
+        `id`,`username`,`sex`,`job`,`birthday`,`idnumber`,`phone`,`education`,`mail`,`politics`,`type`,`bachelorschool`,`masterschool`,`doctorschool`,`bachelormajor`,`mastermajor`,`doctormajor`,`graduationdate`,`hometown`,`languagelevel`,`computerlevel`,`resumenum`,`resumeurl`,`interviewresult`,`englishscore`,`status`,`jobone`,`jobtwo`,`jobthree`,`exemptionreason`,`create_by`,`create_date`,`update_by`,`update_date`,`remarks`,`flag`,(
+        SELECT
+        CONCAT(DATE_FORMAT(b.starttime,'%Y/%m/%d'),' - ',DATE_FORMAT(b.endtime,'%Y/%m/%d'))
+        FROM
+        ax_plan b
+        WHERE
+        b.id = a.interviewdate
+        )as interviewdate from ax_applicants a
+        <where>
+            <if test="id != null and id != ''">and a.id = #{id}</if>
+            <if test="username != null and username != ''">and a.username LIKE concat('%',#{username},'%')</if>
+            <if test="sex != null and sex != ''">and a.sex = #{sex}</if>
+            <if test="job != null and job != ''">and a.job = #{job}</if>
+            <if test="birthday != null and birthday != ''">and a.birthday = #{birthday}</if>
+            <if test="idnumber != null and idnumber != ''">and a.idnumber = #{idnumber}</if>
+            <if test="phone != null and phone != ''">and a.phone = #{phone}</if>
+            <if test="education != null and education != ''">and a.education = #{education}</if>
+            <if test="mail != null and mail != ''">and a.mail = #{mail}</if>
+            <if test="politics != null and politics != ''">and a.politics = #{politics}</if>
+            <if test="type != null and type != ''">and a.type = #{type}</if>
+            <if test="bachelorschool != null and bachelorschool != ''">and a.bachelorschool = #{bachelorschool}</if>
+            <if test="masterschool != null and masterschool != ''">and a.masterschool = #{masterschool}</if>
+            <if test="doctorschool != null and doctorschool != ''">and a.doctorschool = #{doctorschool}</if>
+            <if test="bachelormajor != null and bachelormajor != ''">and a.bachelormajor = #{bachelormajor}</if>
+            <if test="mastermajor != null and mastermajor != ''">and a.mastermajor = #{mastermajor}</if>
+            <if test="doctormajor != null and doctormajor != ''">and a.doctormajor = #{doctormajor}</if>
+            <if test="graduationdate != null and graduationdate != ''">and a.graduationdate = #{graduationdate}</if>
+            <if test="hometown != null and hometown != ''">and a.hometown = #{hometown}</if>
+            <if test="languagelevel != null and languagelevel != ''">and a.languagelevel = #{languagelevel}</if>
+            <if test="computerlevel != null and computerlevel != ''">and a.computerlevel = #{computerlevel}</if>
+            <if test="resumenum != null and resumenum != ''">and a.resumenum = #{resumenum}</if>
+            <if test="resumeurl != null and resumeurl != ''">and a.resumeurl = #{resumeurl}</if>
+            <if test="interviewresult != null and interviewresult != ''">and interviewresult = #{interviewresult}</if>
+            <if test="englishscore != null and englishscore != ''">and a.englishscore = #{englishscore}</if>
+            <if test="status != null and status != ''">and a.status = #{status}</if>
+            <if test="interviewdate != null and interviewdate != ''">and a.interviewdate = #{interviewdate}</if>
+            <if test="jobone != null and jobone != ''">and a.jobone = #{jobone}</if>
+            <if test="jobtwo != null and jobtwo != ''">and a.jobtwo = #{jobtwo}</if>
+            <if test="jobthree != null and jobthree != ''">and a.jobthree = #{jobthree}</if>
+            <if test="exemptionreason != null and exemptionreason != ''">and a.exemptionreason = #{exemptionreason}</if>
+            <if test="createBy != null and createBy != ''">and a.create_by = #{createBy}</if>
+            <if test="createDate != null and createDate != ''">and a.create_date = #{createDate}</if>
+            <if test="updateBy != null and updateBy != ''">and a.update_by = #{updateBy}</if>
+            <if test="updateDate != null and updateDate != ''">and a.update_date = #{updateDate}</if>
+            <if test="remarks != null and remarks != ''">and a.remarks = #{remarks}</if>
+            <if test="searchstarttime != null and searchstarttime != '' and searchendtime != null and searchendtime != ''">
+                and a.create_date BETWEEN #{searchstarttime} AND #{searchendtime}
+            </if>
+        </where>
+        <choose>
+            <when test="sort != null and sort.trim() != ''">
+                order by ${sort} ${order}
+            </when>
+            <otherwise>
+                order by a.job desc, convert(a.username using gbk) asc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="preadmissionlist" resultType="com.anxin.applicants.domain.ApplicantsDO">
+        SELECT a.*,sum(b.score) as sumscore,COUNT(b.id) as counttempuser from ax_applicants a LEFT JOIN
+        (
+        SELECT
+        *
+        FROM
+        ax_score
+        WHERE
+        score IS NOT NULL
+        ) b ON a.id = b.applicant_id
+        <where>
+            <if test="id != null and id != ''">and id = #{id}</if>
+            <if test="username != null and username != ''">and username = #{username}</if>
+            <if test="sex != null and sex != ''">and sex = #{sex}</if>
+            <if test="job != null and job != ''">and a.job LIKE concat('%',#{job},'%')</if>
+            <if test="birthday != null and birthday != ''">and birthday = #{birthday}</if>
+            <if test="idnumber != null and idnumber != ''">and idnumber = #{idnumber}</if>
+            <if test="phone != null and phone != ''">and phone = #{phone}</if>
+            <if test="education != null and education != ''">and a.education = #{education}</if>
+            <if test="mail != null and mail != ''">and mail = #{mail}</if>
+            <if test="politics != null and politics != ''">and politics = #{politics}</if>
+            <if test="type != null and type != ''">and type = #{type}</if>
+            <if test="bachelorschool != null and bachelorschool != ''">and bachelorschool = #{bachelorschool}</if>
+            <if test="masterschool != null and masterschool != ''">and masterschool = #{masterschool}</if>
+            <if test="doctorschool != null and doctorschool != ''">and doctorschool = #{doctorschool}</if>
+            <if test="bachelormajor != null and bachelormajor != ''">and bachelormajor = #{bachelormajor}</if>
+            <if test="mastermajor != null and mastermajor != ''">and mastermajor = #{mastermajor}</if>
+            <if test="doctormajor != null and doctormajor != ''">and doctormajor = #{doctormajor}</if>
+            <if test="graduationdate != null and graduationdate != ''">and graduationdate = #{graduationdate}</if>
+            <if test="hometown != null and hometown != ''">and hometown = #{hometown}</if>
+            <if test="languagelevel != null and languagelevel != ''">and languagelevel = #{languagelevel}</if>
+            <if test="computerlevel != null and computerlevel != ''">and computerlevel = #{computerlevel}</if>
+            <if test="resumenum != null and resumenum != ''">and resumenum = #{resumenum}</if>
+            <if test="resumeurl != null and resumeurl != ''">and resumeurl = #{resumeurl}</if>
+            <if test="interviewresult != null and interviewresult != ''">and interviewresult = #{interviewresult}</if>
+            <if test="englishscore != null and englishscore != ''">and englishscore = #{englishscore}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="interviewdate != null and interviewdate != ''">and interviewdate = #{interviewdate}</if>
+            <if test="jobone != null and jobone != ''">and jobone = #{jobone}</if>
+            <if test="jobtwo != null and jobtwo != ''">and jobtwo = #{jobtwo}</if>
+            <if test="jobthree != null and jobthree != ''">and jobthree = #{jobthree}</if>
+            <if test="exemptionreason != null and exemptionreason != ''">and exemptionreason = #{exemptionreason}</if>
+            <if test="createBy != null and createBy != ''">and create_by = #{createBy}</if>
+            <if test="createDate != null and createDate != ''">and create_date = #{createDate}</if>
+            <if test="updateBy != null and updateBy != ''">and update_by = #{updateBy}</if>
+            <if test="updateDate != null and updateDate != ''">and update_date = #{updateDate}</if>
+            <if test="remarks != null and remarks != ''">and remarks = #{remarks}</if>
+            <if test="searchstarttime != null and searchstarttime != '' and searchendtime != null and searchendtime != ''">
+                and a.create_date BETWEEN #{searchstarttime} AND #{searchendtime}
+            </if>
+            <if test="rowids != null">
+                and a.id in
+                <foreach collection="rowids" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        GROUP BY a.id
+        <choose>
+            <when test="sort != null and sort.trim() != ''">
+                order by ${sort} ${order}
+            </when>
+            <otherwise>
+                order by a.interviewresult desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+
+    <select id="getInterviewResult" resultType="com.anxin.applicants.domain.ApplicantsDO">
+        SELECT a.*,sum(b.score) as sumscore,COUNT(b.id) as counttempuser from ax_applicants a LEFT JOIN
+        (
+        SELECT
+        *
+        FROM
+        ax_score
+        WHERE
+        score IS NOT NULL
+        ) b ON a.id = b.applicant_id
+        <where>
+            a.interviewresult is not NULL
+            <if test="id != null and id != ''">and id = #{id}</if>
+            <if test="username != null and username != ''">and username = #{username}</if>
+            <if test="sex != null and sex != ''">and sex = #{sex}</if>
+            <if test="job != null and job != ''">and a.job = #{job}</if>
+            <if test="birthday != null and birthday != ''">and birthday = #{birthday}</if>
+            <if test="idnumber != null and idnumber != ''">and idnumber = #{idnumber}</if>
+            <if test="phone != null and phone != ''">and phone = #{phone}</if>
+            <if test="education != null and education != ''">and a.education = #{education}</if>
+            <if test="mail != null and mail != ''">and mail = #{mail}</if>
+            <if test="politics != null and politics != ''">and politics = #{politics}</if>
+            <if test="type != null and type != ''">and type = #{type}</if>
+            <if test="bachelorschool != null and bachelorschool != ''">and bachelorschool = #{bachelorschool}</if>
+            <if test="masterschool != null and masterschool != ''">and masterschool = #{masterschool}</if>
+            <if test="doctorschool != null and doctorschool != ''">and doctorschool = #{doctorschool}</if>
+            <if test="bachelormajor != null and bachelormajor != ''">and bachelormajor = #{bachelormajor}</if>
+            <if test="mastermajor != null and mastermajor != ''">and mastermajor = #{mastermajor}</if>
+            <if test="doctormajor != null and doctormajor != ''">and doctormajor = #{doctormajor}</if>
+            <if test="graduationdate != null and graduationdate != ''">and graduationdate = #{graduationdate}</if>
+            <if test="hometown != null and hometown != ''">and hometown = #{hometown}</if>
+            <if test="languagelevel != null and languagelevel != ''">and languagelevel = #{languagelevel}</if>
+            <if test="computerlevel != null and computerlevel != ''">and computerlevel = #{computerlevel}</if>
+            <if test="resumenum != null and resumenum != ''">and resumenum = #{resumenum}</if>
+            <if test="resumeurl != null and resumeurl != ''">and resumeurl = #{resumeurl}</if>
+            <if test="interviewresult != null and interviewresult != ''">and interviewresult = #{interviewresult}</if>
+            <if test="englishscore != null and englishscore != ''">and englishscore = #{englishscore}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="interviewdate != null and interviewdate != ''">and interviewdate = #{interviewdate}</if>
+            <if test="jobone != null and jobone != ''">and jobone = #{jobone}</if>
+            <if test="jobtwo != null and jobtwo != ''">and jobtwo = #{jobtwo}</if>
+            <if test="jobthree != null and jobthree != ''">and jobthree = #{jobthree}</if>
+            <if test="exemptionreason != null and exemptionreason != ''">and exemptionreason = #{exemptionreason}</if>
+            <if test="createBy != null and createBy != ''">and create_by = #{createBy}</if>
+            <if test="createDate != null and createDate != ''">and create_date = #{createDate}</if>
+            <if test="updateBy != null and updateBy != ''">and update_by = #{updateBy}</if>
+            <if test="updateDate != null and updateDate != ''">and update_date = #{updateDate}</if>
+            <if test="remarks != null and remarks != ''">and remarks = #{remarks}</if>
+            <if test="searchstarttime != null and searchstarttime != '' and searchendtime != null and searchendtime != ''">
+                and a.create_date BETWEEN #{searchstarttime} AND #{searchendtime}
+            </if>
+        </where>
+        group by a.id HAVING count(b.id) <![CDATA[ <> ]]> 0
+        order by a.job asc, a.interviewresult desc
+    </select>
+
+
+    <select id="count" resultType="int">
+        select count(*) from ax_applicants
+        <where>
+            <if test="id != null and id != ''">and id = #{id}</if>
+            <if test="username != null and username != ''">and username LIKE concat('%',#{username},'%')</if>
+            <if test="sex != null and sex != ''">and sex = #{sex}</if>
+            <if test="job != null and job != ''">and job LIKE concat('%',#{job},'%')</if>
+            <if test="birthday != null and birthday != ''">and birthday = #{birthday}</if>
+            <if test="idnumber != null and idnumber != ''">and idnumber = #{idnumber}</if>
+            <if test="phone != null and phone != ''">and phone = #{phone}</if>
+            <if test="education != null and education != ''">and education = #{education}</if>
+            <if test="mail != null and mail != ''">and mail = #{mail}</if>
+            <if test="politics != null and politics != ''">and politics = #{politics}</if>
+            <if test="type != null and type != ''">and type = #{type}</if>
+            <if test="bachelorschool != null and bachelorschool != ''">and bachelorschool = #{bachelorschool}</if>
+            <if test="masterschool != null and masterschool != ''">and masterschool = #{masterschool}</if>
+            <if test="doctorschool != null and doctorschool != ''">and doctorschool = #{doctorschool}</if>
+            <if test="bachelormajor != null and bachelormajor != ''">and bachelormajor = #{bachelormajor}</if>
+            <if test="mastermajor != null and mastermajor != ''">and mastermajor = #{mastermajor}</if>
+            <if test="doctormajor != null and doctormajor != ''">and doctormajor = #{doctormajor}</if>
+            <if test="graduationdate != null and graduationdate != ''">and graduationdate = #{graduationdate}</if>
+            <if test="hometown != null and hometown != ''">and hometown = #{hometown}</if>
+            <if test="languagelevel != null and languagelevel != ''">and languagelevel = #{languagelevel}</if>
+            <if test="computerlevel != null and computerlevel != ''">and computerlevel = #{computerlevel}</if>
+            <if test="resumenum != null and resumenum != ''">and resumenum = #{resumenum}</if>
+            <if test="resumeurl != null and resumeurl != ''">and resumeurl = #{resumeurl}</if>
+            <if test="interviewresult != null and interviewresult != ''">and interviewresult = #{interviewresult}</if>
+            <if test="englishscore != null and englishscore != ''">and englishscore = #{englishscore}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="interviewdate != null and interviewdate != ''">and interviewdate = #{interviewdate}</if>
+            <if test="jobone != null and jobone != ''">and jobone = #{jobone}</if>
+            <if test="jobtwo != null and jobtwo != ''">and jobtwo = #{jobtwo}</if>
+            <if test="jobthree != null and jobthree != ''">and jobthree = #{jobthree}</if>
+            <if test="exemptionreason != null and exemptionreason != ''">and exemptionreason = #{exemptionreason}</if>
+            <if test="createBy != null and createBy != ''">and create_by = #{createBy}</if>
+            <if test="createDate != null and createDate != ''">and create_date = #{createDate}</if>
+            <if test="updateBy != null and updateBy != ''">and update_by = #{updateBy}</if>
+            <if test="updateDate != null and updateDate != ''">and update_date = #{updateDate}</if>
+            <if test="remarks != null and remarks != ''">and remarks = #{remarks}</if>
+            <if test="searchstarttime != null and searchstarttime != '' and searchendtime != null and searchendtime != ''">
+                and create_date BETWEEN #{searchstarttime} AND #{searchendtime}
+            </if>
+        </where>
+    </select>
+
+    <select id="listType" resultType="com.anxin.applicants.domain.ApplicantsDO">
+		select distinct job from ax_applicants
+	</select>
+    <select id="getExportList" resultType="com.anxin.applicants.domain.ApplicantsDO">
+        SELECT
+        <if test="collist != null and collist != ''">${collist}</if>
+        from ax_applicants a
+        <if test="rowids != null">
+            WHERE a.id in
+            <foreach collection="rowids" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+    <select id="exportlist" resultType="com.anxin.applicants.domain.ApplicantsDO">
+        select `id`,`username`,`sex`,`job`,`birthday`,`idnumber`,`phone`,`mail`,`politics`,
+        `type`,`education`,
+        CONCAT(bachelorschool,'-',bachelormajor) as `bachelorschool`,
+        CONCAT(masterschool,'-',mastermajor) as `masterschool`,
+        CONCAT(doctorschool,'-',doctormajor) as `doctorschool`,
+        `graduationdate`,`hometown`,`languagelevel`,`computerlevel`,`resumenum`,
+        `resumeurl`,`interviewresult`,`englishscore`,`status`,
+        (SELECT CONCAT(DATE_FORMAT(b.starttime,'%Y/%m/%d'),' - ',DATE_FORMAT(b.endtime,'%Y/%m/%d'))FROM ax_plan b WHERE
+        b.id = a.interviewdate) as interviewdate,
+        `jobone`,`jobtwo`,
+        `jobthree`,`exemptionreason`,`create_by`,`create_date`,`update_by`,`update_date`,`remarks`
+        from ax_applicants a
+        <if test="rowids != null">
+            WHERE a.id in
+            <foreach collection="rowids" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+    <select id="getAppicants" resultType="com.anxin.applicants.domain.ApplicantsDO">
+		SELECT
+			m.*,
+		    s.score,
+			s.ranking
+		FROM
+			(
+				SELECT
+					*
+				FROM
+					ax_applicants a
+				WHERE
+			 a.interviewdate IN (
+		SELECT n.id FROM ax_plan n WHERE NOW() between n.starttime and n.endtime
+		) AND
+					a.job = (
+						SELECT
+							p.jobname
+						FROM
+							ax_post p
+						WHERE
+							p.`status` = '1' AND
+							p.id = #{jobid}
+					)
+			) m
+		LEFT JOIN (
+			SELECT
+				*
+			FROM
+				ax_score
+			WHERE
+				tempuser_id = #{userid}
+		) s ON s.applicant_id = m.id ORDER BY (s.ranking is NULL or s.ranking =''), s.ranking+1 ASC, convert(m.username using gbk)  ASC
+	</select>
+
+    <insert id="save" parameterType="com.anxin.applicants.domain.ApplicantsDO">
+		insert into ax_applicants
+		(
+			`id`, 
+			`username`, 
+			`sex`, 
+			`job`, 
+			`birthday`, 
+			`idnumber`, 
+			`phone`,
+			`education`,
+			`mail`, 
+			`politics`, 
+			`type`, 
+			`bachelorschool`, 
+			`masterschool`, 
+			`doctorschool`, 
+			`bachelormajor`, 
+			`mastermajor`, 
+			`doctormajor`, 
+			`graduationdate`, 
+			`hometown`, 
+			`languagelevel`, 
+			`computerlevel`, 
+			`resumenum`, 
+			`resumeurl`, 
+			`interviewresult`, 
+			`englishscore`, 
+			`status`, 
+			`interviewdate`, 
+			`jobone`, 
+			`jobtwo`, 
+			`jobthree`, 
+			`exemptionreason`,
+			`flag`,
+			`create_by`, 
+			`create_date`, 
+			`update_by`, 
+			`update_date`, 
+			`remarks`
+		)
+		values
+		(
+			#{id}, 
+			#{username}, 
+			#{sex}, 
+			#{job}, 
+			#{birthday}, 
+			#{idnumber}, 
+			#{phone},
+			#{education},
+			#{mail}, 
+			#{politics}, 
+			#{type}, 
+			#{bachelorschool}, 
+			#{masterschool}, 
+			#{doctorschool}, 
+			#{bachelormajor}, 
+			#{mastermajor}, 
+			#{doctormajor}, 
+			#{graduationdate}, 
+			#{hometown}, 
+			#{languagelevel}, 
+			#{computerlevel}, 
+			#{resumenum}, 
+			#{resumeurl}, 
+			#{interviewresult}, 
+			#{englishscore}, 
+			#{status}, 
+			#{interviewdate}, 
+			#{jobone}, 
+			#{jobtwo}, 
+			#{jobthree}, 
+			#{exemptionreason},
+			#{flag},
+			#{createBy}, 
+			#{createDate}, 
+			#{updateBy}, 
+			#{updateDate}, 
+			#{remarks}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.anxin.applicants.domain.ApplicantsDO">
+        update ax_applicants
+        <set>
+            <if test="username != null">`username` = #{username},</if>
+            <if test="sex != null">`sex` = #{sex},</if>
+            <if test="job != null">`job` = #{job},</if>
+            <if test="birthday != null">`birthday` = #{birthday},</if>
+            <if test="idnumber != null">`idnumber` = #{idnumber},</if>
+            <if test="phone != null">`phone` = #{phone},</if>
+            <if test="education != null">`education` = #{education},</if>
+            <if test="mail != null">`mail` = #{mail},</if>
+            <if test="politics != null">`politics` = #{politics},</if>
+            <if test="type != null">`type` = #{type},</if>
+            <if test="bachelorschool != null">`bachelorschool` = #{bachelorschool},</if>
+            <if test="masterschool != null">`masterschool` = #{masterschool},</if>
+            <if test="doctorschool != null">`doctorschool` = #{doctorschool},</if>
+            <if test="bachelormajor != null">`bachelormajor` = #{bachelormajor},</if>
+            <if test="mastermajor != null">`mastermajor` = #{mastermajor},</if>
+            <if test="doctormajor != null">`doctormajor` = #{doctormajor},</if>
+            <if test="graduationdate != null">`graduationdate` = #{graduationdate},</if>
+            <if test="hometown != null">`hometown` = #{hometown},</if>
+            <if test="languagelevel != null">`languagelevel` = #{languagelevel},</if>
+            <if test="computerlevel != null">`computerlevel` = #{computerlevel},</if>
+            <if test="resumenum != null">`resumenum` = #{resumenum},</if>
+            <if test="resumeurl != null">`resumeurl` = #{resumeurl},</if>
+            <if test="interviewresult != null">`interviewresult` = #{interviewresult},</if>
+            <if test="englishscore != null">`englishscore` = #{englishscore},</if>
+            <if test="status != null">`status` = #{status},</if>
+            <if test="interviewdate != null">`interviewdate` = #{interviewdate},</if>
+            <if test="jobone != null">`jobone` = #{jobone},</if>
+            <if test="jobtwo != null">`jobtwo` = #{jobtwo},</if>
+            <if test="jobthree != null">`jobthree` = #{jobthree},</if>
+            <if test="exemptionreason != null">`exemptionreason` = #{exemptionreason},</if>
+            <if test="flag != null">`flag`= #{flag},</if>
+            <if test="createBy != null">`create_by` = #{createBy},</if>
+            <if test="createDate != null">`create_date` = #{createDate},</if>
+            <if test="updateBy != null">`update_by` = #{updateBy},</if>
+            <if test="updateDate != null">`update_date` = #{updateDate},</if>
+            <if test="remarks != null">`remarks` = #{remarks}</if>
+            <if test="admissiontype != null">`admissiontype` = #{admissiontype}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+
+    <update id="updateScore" parameterType="com.anxin.applicants.domain.ApplicantsDO">
+        update ax_applicants
+        <set>
+            <if test="englishscore != null">`englishscore` = #{englishscore},</if>
+            <if test="updateDate != null">`update_date` = #{updateDate}</if>
+        </set>
+        where username= #{username}
+    </update>
+
+
+    <delete id="remove">
+		delete from ax_applicants where id = #{value}
+	</delete>
+
+    <delete id="batchRemove">
+        delete from ax_applicants where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="preadmissionlistlimit" resultType="com.anxin.applicants.domain.ApplicantsDO">
+        SELECT a.*,sum(b.score) as sumscore,COUNT(b.id) as counttempuser from ax_applicants a LEFT JOIN
+        (
+        SELECT
+        *
+        FROM
+        ax_score
+        WHERE
+        score IS NOT NULL
+        ) b ON a.id = b.applicant_id
+        <where>
+            a.admissiontype!='' and a.interviewresult!=''
+            <if test="id != null and id != ''">and id = #{id}</if>
+            <if test="username != null and username != ''">and username = #{username}</if>
+            <if test="sex != null and sex != ''">and sex = #{sex}</if>
+            <if test="job != null and job != ''">and a.job LIKE concat('%',#{job},'%')</if>
+            <if test="birthday != null and birthday != ''">and birthday = #{birthday}</if>
+            <if test="idnumber != null and idnumber != ''">and idnumber = #{idnumber}</if>
+            <if test="phone != null and phone != ''">and phone = #{phone}</if>
+            <if test="education != null and education != ''">and a.education = #{education}</if>
+            <if test="mail != null and mail != ''">and mail = #{mail}</if>
+            <if test="politics != null and politics != ''">and politics = #{politics}</if>
+            <if test="type != null and type != ''">and type = #{type}</if>
+            <if test="bachelorschool != null and bachelorschool != ''">and bachelorschool = #{bachelorschool}</if>
+            <if test="masterschool != null and masterschool != ''">and masterschool = #{masterschool}</if>
+            <if test="doctorschool != null and doctorschool != ''">and doctorschool = #{doctorschool}</if>
+            <if test="bachelormajor != null and bachelormajor != ''">and bachelormajor = #{bachelormajor}</if>
+            <if test="mastermajor != null and mastermajor != ''">and mastermajor = #{mastermajor}</if>
+            <if test="doctormajor != null and doctormajor != ''">and doctormajor = #{doctormajor}</if>
+            <if test="graduationdate != null and graduationdate != ''">and graduationdate = #{graduationdate}</if>
+            <if test="hometown != null and hometown != ''">and hometown = #{hometown}</if>
+            <if test="languagelevel != null and languagelevel != ''">and languagelevel = #{languagelevel}</if>
+            <if test="computerlevel != null and computerlevel != ''">and computerlevel = #{computerlevel}</if>
+            <if test="resumenum != null and resumenum != ''">and resumenum = #{resumenum}</if>
+            <if test="resumeurl != null and resumeurl != ''">and resumeurl = #{resumeurl}</if>
+            <if test="interviewresult != null and interviewresult != ''">and interviewresult = #{interviewresult}</if>
+            <if test="englishscore != null and englishscore != ''">and englishscore = #{englishscore}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="interviewdate != null and interviewdate != ''">and interviewdate = #{interviewdate}</if>
+            <if test="jobone != null and jobone != ''">and jobone = #{jobone}</if>
+            <if test="jobtwo != null and jobtwo != ''">and jobtwo = #{jobtwo}</if>
+            <if test="jobthree != null and jobthree != ''">and jobthree = #{jobthree}</if>
+            <if test="exemptionreason != null and exemptionreason != ''">and exemptionreason = #{exemptionreason}</if>
+            <if test="createBy != null and createBy != ''">and create_by = #{createBy}</if>
+            <if test="createDate != null and createDate != ''">and create_date = #{createDate}</if>
+            <if test="updateBy != null and updateBy != ''">and update_by = #{updateBy}</if>
+            <if test="updateDate != null and updateDate != ''">and update_date = #{updateDate}</if>
+            <if test="remarks != null and remarks != ''">and remarks = #{remarks}</if>
+            <if test="searchstarttime != null and searchstarttime != '' and searchendtime != null and searchendtime != ''">
+                and a.update_date BETWEEN #{searchstarttime} AND #{searchendtime}
+            </if>
+            <if test="rowids != null">
+                and a.id in
+                <foreach collection="rowids" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        GROUP BY a.id
+        <choose>
+            <when test="sort != null and sort.trim() != ''">
+                order by ${sort} ${order}
+            </when>
+            <otherwise>
+                order by a.job desc, a.interviewresult desc,convert(a.username using gbk) asc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="countPreAdmission" resultType="int">
+        SELECT
+        COUNT(a.id)
+        FROM
+        ax_applicants a
+        <where>
+            a.admissiontype!='' and a.interviewresult!=''
+            <if test="id != null and id != ''">and id = #{id}</if>
+            <if test="username != null and username != ''">and username = #{username}</if>
+            <if test="sex != null and sex != ''">and sex = #{sex}</if>
+            <if test="job != null and job != ''">and a.job LIKE concat('%',#{job},'%')</if>
+            <if test="birthday != null and birthday != ''">and birthday = #{birthday}</if>
+            <if test="idnumber != null and idnumber != ''">and idnumber = #{idnumber}</if>
+            <if test="phone != null and phone != ''">and phone = #{phone}</if>
+            <if test="education != null and education != ''">and a.education = #{education}</if>
+            <if test="mail != null and mail != ''">and mail = #{mail}</if>
+            <if test="politics != null and politics != ''">and politics = #{politics}</if>
+            <if test="type != null and type != ''">and type = #{type}</if>
+            <if test="bachelorschool != null and bachelorschool != ''">and bachelorschool = #{bachelorschool}</if>
+            <if test="masterschool != null and masterschool != ''">and masterschool = #{masterschool}</if>
+            <if test="doctorschool != null and doctorschool != ''">and doctorschool = #{doctorschool}</if>
+            <if test="bachelormajor != null and bachelormajor != ''">and bachelormajor = #{bachelormajor}</if>
+            <if test="mastermajor != null and mastermajor != ''">and mastermajor = #{mastermajor}</if>
+            <if test="doctormajor != null and doctormajor != ''">and doctormajor = #{doctormajor}</if>
+            <if test="graduationdate != null and graduationdate != ''">and graduationdate = #{graduationdate}</if>
+            <if test="hometown != null and hometown != ''">and hometown = #{hometown}</if>
+            <if test="languagelevel != null and languagelevel != ''">and languagelevel = #{languagelevel}</if>
+            <if test="computerlevel != null and computerlevel != ''">and computerlevel = #{computerlevel}</if>
+            <if test="resumenum != null and resumenum != ''">and resumenum = #{resumenum}</if>
+            <if test="resumeurl != null and resumeurl != ''">and resumeurl = #{resumeurl}</if>
+            <if test="interviewresult != null and interviewresult != ''">and interviewresult = #{interviewresult}</if>
+            <if test="englishscore != null and englishscore != ''">and englishscore = #{englishscore}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="interviewdate != null and interviewdate != ''">and interviewdate = #{interviewdate}</if>
+            <if test="jobone != null and jobone != ''">and jobone = #{jobone}</if>
+            <if test="jobtwo != null and jobtwo != ''">and jobtwo = #{jobtwo}</if>
+            <if test="jobthree != null and jobthree != ''">and jobthree = #{jobthree}</if>
+            <if test="exemptionreason != null and exemptionreason != ''">and exemptionreason = #{exemptionreason}</if>
+            <if test="createBy != null and createBy != ''">and create_by = #{createBy}</if>
+            <if test="createDate != null and createDate != ''">and create_date = #{createDate}</if>
+            <if test="updateBy != null and updateBy != ''">and update_by = #{updateBy}</if>
+            <if test="updateDate != null and updateDate != ''">and update_date = #{updateDate}</if>
+            <if test="remarks != null and remarks != ''">and remarks = #{remarks}</if>
+            <if test="searchstarttime != null and searchstarttime != '' and searchendtime != null and searchendtime != ''">
+                and a.update_date BETWEEN #{searchstarttime} AND #{searchendtime}
+            </if>
+            <if test="rowids != null">
+                and a.id in
+                <foreach collection="rowids" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        <choose>
+            <when test="sort != null and sort.trim() != ''">
+                order by ${sort} ${order}
+            </when>
+            <otherwise>
+                order by a.interviewresult desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    <select id="getByNameAndJob" resultType="com.anxin.applicants.domain.ApplicantsDO">
+     SELECT * from ax_applicants a WHERE a.username = #{username} and a.job <![CDATA[<>]]> #{job}
+    </select>
+
+</mapper>

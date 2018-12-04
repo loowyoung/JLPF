@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.anxin.tempuser.dao.TempuserDao">
+
+	<select id="get" resultType="com.anxin.tempuser.domain.TempuserDO">
+		select `id`,`username`,`password`,`status`,`create_by`,`create_date`,`update_by`,`update_date`,`remarks` from ax_tempuser where id = #{value}
+	</select>
+
+	<select id="list" resultType="com.anxin.tempuser.domain.TempuserDO">
+		SELECT
+		a.*,GROUP_CONCAT(c.jobname ORDER BY c.create_date DESC SEPARATOR ' , ') as jobname
+		FROM
+		ax_tempuser a
+		LEFT JOIN ax_jobtempuser b ON a.id = b.tempuser_id
+		LEFT JOIN ax_post c ON b.job_id = c.id
+        <where>
+		  		  <if test="id != null and id != ''"> and a.id = #{id} </if>
+		  		  <if test="username != null and username != ''"> and a.username = #{username} </if>
+		  		  <if test="password != null and password != ''"> and a.password = #{password} </if>
+		  		  <if test="status != null and status != ''"> and a.status = #{status} </if>
+		  		  <if test="createBy != null and createBy != ''"> and a.create_by = #{createBy} </if>
+		  		  <if test="createDate != null and createDate != ''"> and a.create_date = #{createDate} </if>
+		  		  <if test="updateBy != null and updateBy != ''"> and a.update_by = #{updateBy} </if>
+		  		  <if test="updateDate != null and updateDate != ''"> and a.update_date = #{updateDate} </if>
+		  		  <if test="remarks != null and remarks != ''"> and a.remarks = #{remarks} </if>
+				<if test="searchstarttime != null and searchstarttime != '' and searchendtime != null and searchendtime != ''"> and a.create_date BETWEEN #{searchstarttime} AND #{searchendtime} </if>
+		  		</where>
+				GROUP BY a.id
+        <choose>
+            <when test="sort != null and sort.trim() != ''">
+                order by ${sort} ${order}
+            </when>
+			<otherwise>
+                order by a.usernum ASC
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+
+	
+ 	<select id="count" resultType="int">
+		select count(*) from ax_tempuser
+		 <where>  
+		  		  <if test="id != null and id != ''"> and id = #{id} </if>
+		  		  <if test="username != null and username != ''"> and username = #{username} </if>
+		  		  <if test="password != null and password != ''"> and password = #{password} </if>
+		  		  <if test="status != null and status != ''"> and status = #{status} </if>
+		  		  <if test="createBy != null and createBy != ''"> and create_by = #{createBy} </if>
+		  		  <if test="createDate != null and createDate != ''"> and create_date = #{createDate} </if>
+		  		  <if test="updateBy != null and updateBy != ''"> and update_by = #{updateBy} </if>
+		  		  <if test="updateDate != null and updateDate != ''"> and update_date = #{updateDate} </if>
+		  		  <if test="remarks != null and remarks != ''"> and remarks = #{remarks} </if>
+			 	<if test="searchstarttime != null and searchstarttime != '' and searchendtime != null and searchendtime != ''"> and create_date BETWEEN #{searchstarttime} AND #{searchendtime} </if>
+		  		</where>
+	</select>
+
+	<select id="maxUserNum" resultType="int">
+		-- 		SELECT CASE WHEN usernum IS NULL THEN 1 ELSE MAX(usernum)+1 END as username FROM ax_tempuser
+		SELECT CASE WHEN usernum IS NULL THEN 2 ELSE usernum END FROM ax_tempuser
+	</select>
+
+	<insert id="save" parameterType="com.anxin.tempuser.domain.TempuserDO">
+		insert into ax_tempuser
+		(
+			`id`, 
+			`username`, 
+			`password`, 
+			`status`, 
+			`create_by`, 
+			`create_date`, 
+			`update_by`, 
+			`update_date`, 
+			`remarks`,
+			`usernum`
+		)
+		values
+		(
+			#{id}, 
+			#{username}, 
+			#{password}, 
+			#{status}, 
+			#{createBy}, 
+			#{createDate}, 
+			#{updateBy}, 
+			#{updateDate}, 
+			#{remarks},
+			#{usernum}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.anxin.tempuser.domain.TempuserDO">
+		update ax_tempuser 
+		<set>
+			<if test="username != null">`username` = #{username}, </if>
+			<if test="password != null">`password` = #{password}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="createBy != null">`create_by` = #{createBy}, </if>
+			<if test="createDate != null">`create_date` = #{createDate}, </if>
+			<if test="updateBy != null">`update_by` = #{updateBy}, </if>
+			<if test="updateDate != null">`update_date` = #{updateDate}, </if>
+			<if test="remarks != null">`remarks` = #{remarks}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="remove">
+		delete from ax_tempuser where id = #{value}
+	</delete>
+
+	<delete id="batchRemove">
+		delete from ax_tempuser where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<delete id="removeJobs">
+		delete from ax_jobtempuser where tempuser_id=#{tempuserid}
+	</delete>
+
+	<insert id="saveJobTempuser">
+		INSERT INTO ax_jobtempuser(
+		`id`,
+		`tempuser_id`,
+		`job_id`,
+		`create_by`,
+		`create_date`,
+		`update_by`,
+		`update_date`,
+		`remarks`) values
+		<foreach item="item" index="index" collection="list"
+				 separator=",">
+			(#{item.id},#{item.tempuserid},#{item.jobid},#{item.createBy},#{item.createDate},#{item.updateBy},#{item.updateDate},#{item.remarks})
+		</foreach>
+	</insert>
+
+	<select id="listJobTempByid" resultType="com.anxin.tempuser.domain.JobTempuserDO">
+		select * from ax_jobtempuser where tempuser_id = #{tempuserid}
+	</select>
+
+	<!--前端接口数据-->
+	<select id="getByname" resultType="com.anxin.tempuser.domain.TempuserDO">
+		SELECT *
+		FROM
+		ax_tempuser a
+		<where>
+			<if test="id != null and id != ''"> and a.id = #{id} </if>
+			<if test="username != null and username != ''"> and a.username = #{username} </if>
+			<if test="status != null and status != ''"> and a.status = #{status} </if>
+		</where>
+	</select>
+
+</mapper>
